@@ -727,35 +727,294 @@ renderer.domElement.addEventListener('pointerup', (e) => {
 });
 
 // ---------- новости города ----------
+
+ // ---------- ANIMZONE NEWS SYSTEM ----------
 {
   const names = NICKS.slice(1);
-  const n = () => `<i>@${names[Math.floor(Math.random() * names.length)]}</i>`;
+  const n = () => {
+    if (!names.length) return '<i>@resident</i>';
+    return `<i>@${names[Math.floor(Math.random() * names.length)]}</i>`;
+  };
+
   const O = `<i>@${CONFIG.owner}</i>`;
-  const T = [
-    () => `${n()} проспал: будильник съел кот`,
-    () => `${n()} испёк торт размером с дом. Соседи уже в очереди`,
-    () => `${n()} нашёл во дворе клад: три монеты и старый носок`,
-    () => `Хозяин шалаша ${O} опять жарит что-то на костре. Запах на весь город`,
-    () => `Кто-то разрисовал забор на улице ${1 + Math.floor(Math.random() * 20)}. Улики ведут к коту`,
-    () => `${n()} и ${n()} поспорили, чей двор красивее. Спор продолжается`,
-    () => `${n()} купил газонокосилку и подстриг полгорода`,
-    () => `${n()} завёл хомяка. Хомяк уже богаче хозяина`,
-    () => `${n()} потерял ключи. Нашлись в холодильнике ${n()}`,
-    () => `Жители просят ${O} построить в шалаше второй этаж. Хозяин думает`,
-    () => `${n()} поставил на крышу антенну и поймал радио из 1997 года`,
-    () => `Кот ${n()} сбежал и теперь живёт у трёх соседей сразу`,
-    () => `${n()} пытался перекрасить дом ночью. Получилось в горошек`,
-    () => `В городе уже ${NICKS.length.toLocaleString('ru-RU')} жителей. Тесновато, но весело`,
-    () => `Мэр города (он же ${O}) просит не кормить голубей монетами`,
-    () => `У шалаша ${O} горит костёр, а значит, все приглашены`,
-  ];
-  const pickF = (a) => a[Math.floor(Math.random() * a.length)];
-  const el = $('#ntext'), box = el.parentElement;
-  let x = 0, w = 0, last = 0;
-  const fill = () => { el.innerHTML = Array.from({length: 8}, () => `<span>${pickF(T)()}</span>`).join(''); w = el.scrollWidth; x = box.clientWidth; };
-  const step = (t) => { const dt = Math.min(0.05, (t - last) / 1000 || 0); last = t; x -= dt * 55; if (x < -w) fill(); el.style.transform = `translate(${x}px,-50%)`; requestAnimationFrame(step); };
-  fill(); requestAnimationFrame(step);
+
+  const news = {
+    uz: [
+      () => `${n()} ertalab turdi va yana uxlashga qaror qildi. Eng to‘g‘ri qaror!`,
+      () => `${n()} nonushtaga 15 ta tuxum yedi. Tovuq hali ham shokda`,
+      () => `${n()} mushuk bilan shaxmat o‘ynadi. Mushuk 5:0 hisobida yutdi`,
+      () => `${n()} yangi uy sotib oldi. Endi uyning o‘ziga pul yig‘moqda`,
+      () => `${n()} qo‘shnisidan Wi-Fi parolini so‘radi. Qo‘shni hali ham o‘ylayapti`,
+      () => `${n()} o‘zini millioner deb e'lon qildi. Hisobida 3 ta tanga bor`,
+      () => `${n()} hovlisiga basseyn qurdi. Unda hozircha bitta baqa suzmoqda`,
+      () => `${n()} tort pishirdi. Tortni o‘zi yeb qo‘ydi`,
+      () => `${n()} yangi mashina oldi. Faqat mashinaning g‘ildiraklari yo‘q`,
+      () => `${n()} ertalab yugurishga chiqdi. 10 soniyadan keyin charchadi`,
+      () => `${n()} muzlatkichni ochdi. Ichida faqat umid bor edi`,
+      () => `${n()} qo‘shnisining uyiga kirdi. O‘z uyini topolmay qolibdi`,
+      () => `${n()} mushugiga telefon olib berdi. Endi mushuk undan ko‘proq onlayn`,
+      () => `${n()} 100 metrga yugurish musobaqasida qatnashdi. Startni kutib uxlab qoldi`,
+      () => `${n()} yangi biznes ochdi: havoga internet sotish`,
+      () => `${n()} o‘z soyasi bilan urishib qoldi. Hozir gaplashmayapti`,
+      () => `${n()} uyining tomiga antenna qo‘ydi. Marsdan signal tutdi`,
+      () => `${n()} bir kunda 20 ta uy qurdi. Quruvchi hali ham uxlayapti`,
+      () => `${n()} qo‘shnisidan bitta kartoshka oldi. Hali qaytarmadi`,
+      () => `${n()} yangi telefon oldi. Birinchi bo‘lib mushuk suratga tushdi`,
+      () => `${n()} internet tezligini tekshirdi. Natija: toshbaqadan tezroq`,
+      () => `${n()} o‘z uyiga lift o‘rnatdi. Lift faqat pastga tushadi`,
+      () => `${n()} bog‘iga banan ekdi. Ertasi kuni tarvuz o‘sib chiqdi`,
+      () => `${n()} yangi ish boshladi. Birinchi kuni ta'tilga chiqdi`,
+      () => `${n()} uyini bo‘yadi. Endi qo‘shnilar quyoshdan ko‘zoynak taqmoqda`,
+      () => `${n()} mushugini sayrga olib chiqdi. Mushuk egasini aylantirib keldi`,
+      () => `${n()} osh pishirdi. Hatto qozon ham qochib ketmoqchi`,
+      () => `${n()} yangi velosiped oldi. Lekin minishni unutibdi`,
+      () => `${n()} o‘zini shahar prezidenti deb e'lon qildi. Saylov hali bo‘lmadi`,
+      () => `${n()} uyiga 10 ta eshik o‘rnatdi. Qaysi biri kirish eshigi ekanini bilmayapti`,
+      () => `${n()} osmonda uchayotgan baliqni ko‘rdim deb aytdi. Guvohlar yo‘q`,
+      () => `${n()} qo‘shnisiga salom berdi. Qo‘shni hali javob yozmoqda`,
+      () => `${n()} yangi robot yasadi. Robot birinchi kuni ishdan bo‘shadi`,
+      () => `${n()} telefonini qidirdi. Telefon qo‘lida ekan`,
+      () => `${n()} uyiga kamera o‘rnatdi. Kamera ham uxlab qolibdi`,
+      () => `${n()} 1 million so‘m topdi. Keyin bu tush ekanini bildi`,
+      () => `${n()} mushugiga uy qurdi. Mushuk qo‘shnining uyiga ko‘chib ketdi`,
+      () => `${n()} yangi do‘kon ochdi. Hozircha faqat o‘zi xaridor`,
+      () => `${n()} hovlisiga daraxt ekdi. Daraxt qo‘shnining tomida o‘sdi`,
+      () => `${n()} muzqaymoq oldi. Uni quyosh birinchi bo‘lib yedi`,
+      () => `${n()} o‘z uyini ijaraga berdi. O‘zi ko‘chada qoldi`,
+      () => `${n()} 5 soat uxlab, juda charchadim deb aytdi`,
+      () => `${n()} yangi kiyim oldi. Eski kiyimlar xafa bo‘lib qoldi`,
+      () => `${n()} shahar xaritasini teskari ushlab, adashib qoldi`,
+      () => `${n()} o‘z uyining raqamini unutdi. Hozir qo‘shnilardan so‘rayapti`,
+      () => `${n()} shahar bankiga pul qo‘ydi. Bankda hozir 1 ta pechenye bor`,
+      () => `${n()} yangi samolyot yasadi. U faqat pastga ucha oladi`,
+      () => `${n()} hovlisida konsert berdi. Tomoshabinlar: 2 ta mushuk`,
+      () => `${n()} qo‘shnisiga sovg‘a berdi. Sovg‘a ichida yana bir sovg‘a bor`,
+      () => `${n()} o‘zini detektiv deb e'lon qildi. Birinchi ish: yo‘qolgan paypoq`,
+      () => `${n()} kechasi muzlatkich bilan suhbatlashdi. Muzlatkich javob bermadi`,
+      () => `${n()} 3 kun internetga kirmadi. Hamma uni qidirishni boshladi`,
+      () => `${n()} yangi bog‘ yaratdi. Unda faqat bitta kaktus bor`,
+      () => `${n()} uyining tomiga chiqdi va pastga tushishni unutdi`,
+      () => `${n()} qo‘shnisining mushugiga ism qo‘ydi. Mushuk rozi emas`,
+      () => `${n()} o‘zini oshpaz deb e'lon qildi. Tuxum ham kuyib ketdi`,
+      () => `${n()} shahar bo‘ylab sayrga chiqdi. O‘z hovlisida adashdi`,
+      () => `${n()} 100 ta do‘st topdi. Hammasi bot ekan`,
+      () => `${n()} uyiga yangi internet uladi. Internet ham dam olishga ketdi`,
+      () => `${n()} quyoshga ko‘zoynak sotmoqchi. Quyosh javob bermadi`,
+      () => `${n()} bugun hech narsa qilmadi. Lekin juda band bo‘ldi`,
+      () => `${n()} uyini tozaladi. Chang boshqa qo‘shniga ko‘chib ketdi`,
+      () => `${n()} yangi rekord o‘rnatdi: 12 soat telefon ko‘rish`,
+      () => `${n()} eshikni taqillatdi. O‘zi uyda ekanini unutibdi`,
+      () => `${n()} o‘ziga yordamchi oldi. Yordamchi ham ishga kelmadi`,
+      () => `${n()} katta baliq tutdi. Baliq uni suvga tortib ketdi`,
+      () => `${n()} hovlisiga raketa qo‘ydi. Qo‘shnilar hayron`,
+      () => `${n()} uyiga konditsioner o‘rnatdi. Endi faqat muzlab o‘tiribdi`,
+      () => `${n()} yangi telefon parolini unutdi. Telefon ham xafa`,
+      () => `${n()} 2 ta pitsa buyurtma qildi. Yetkazib beruvchi o‘zi yeb qo‘ydi`,
+      () => `${n()} shahardagi eng tez yuguruvchi bo‘ldi. Chunki boshqa hech kim yugurmadi`,
+      () => `${n()} o‘z uyiga qo‘riqchi oldi. Qo‘riqchi uy egasini kiritmayapti`,
+      () => `${n()} shahar muzeyiga bitta eski paypoq sovg‘a qildi`,
+      () => `${n()} yangi sport zal ochdi. Hozircha faqat stullar bor`,
+      () => `${n()} o‘zining tug‘ilgan kunini unutdi. Mehmonlar ham unutishdi`,
+      () => `${n()} qo‘shnisidan shakar so‘radi. Qo‘shni unga tuz berdi`,
+      () => `${n()} osmonga qarab, bulutlarga salom berdi`,
+      () => `${n()} o‘zining yangi qo‘shig‘ini chiqardi. Hatto mikrofon ham qochdi`,
+      () => `${n()} shahar chempionatida qatnashdi. Mukofot: bitta sabzi`,
+      () => `${n()} uyiga 50 ta chiroq o‘rnatdi. Elektr hisobini ko‘rib yig‘ladi`,
+      () => `${n()} o‘ziga yangi ism tanladi. Ertasi kuni yana o‘zgartirdi`,
+      () => `${n()} mushugini ishga yubordi. Mushuk dam olishga ketdi`,
+      () => `${n()} yangi xarita chizdi. Unda o‘z uyi yo‘q`,
+      () => `${n()} shahar hokimiga ariza yozdi: ko‘proq dam olish kunlari kerak`,
+      () => `${n()} hovlisida xazina topdi. Ichida eski paypoq va tugma bor`,
+      () => `${n()} qo‘shnisining Wi-Fi sini o‘g‘irladi. Parol: 12345678`,
+      () => `${n()} bir kunda 30 ta choy ichdi. Endi choynak undan qo‘rqadi`,
+      () => `${n()} velosipedda uchishni o‘rgandi. Faqat tushida`,
+      () => `${n()} o‘z uyini kengaytirdi. Endi eshik tashqarida qoldi`,
+      () => `${n()} bugun juda baxtli. Sababi: internet ishlayapti`,
+      () => `${n()} shahar markazida raqsga tushdi. Hamma kamerani o‘chirdi`,
+      () => `${n()} o‘ziga yangi kompyuter oldi. Kompyuter undan aqlliroq`,
+      () => `${n()} hovlisida qor yog‘ishini kutmoqda. Hozir yoz`,
+      () => `${n()} yangi kafe ochdi. Menyuda faqat suv bor`,
+      () => `${n()} o‘z uyining tomini tuzatdi. Endi devorlari yo‘q`,
+      () => `${n()} qo‘shnisining itiga salom berdi. It javob qaytarmadi`,
+      () => `${n()} 10 daqiqa ishladi va 5 soat dam oldi`,
+      () => `${n()} bugun shaharning eng mashhur aholisi. Sababi: yangiliklarda chiqdi`,
+      () => `Shaharda mushuklar saylovi boshlandi. Barcha nomzodlar uxlab qolishdi`,
+      () => `${O} kulbasiga lift qurmoqchi. Hozircha narvon bilan chiqiladi`,
+      () => `${O} shahar uchun yangi qoida chiqardi: dushanba kuni uxlab olish mumkin`,
+      () => `${O} kulbasida katta ziyofat uyushtirdi. Mehmonlar adashib qo‘shnining uyiga kirishdi`,
+      () => `Shahar aholisi ${O} dan yangi basseyn so‘ramoqda. Eski basseynda baliqlar yashayapti`,
+      () => `Shahar aholisi bugun juda band: hamma yangiliklarni o‘qiyapti!`,
+      () => `Shaharda aholi soni ${NICKS.length.toLocaleString('uz-UZ')} taga yetdi. Endi navbat do‘konlarga`,
+      () => `Shahar markazida katta yig‘ilish bo‘ldi. Kun tartibi: oxirgi pitsa kimniki?`,
+      () => `Bugun shaharda dam olish kuni. Hatto mushuklar ham ishlamaydi`,
+      () => `Shahar politsiyasi yo‘qolgan paypoqni qidirmoqda. Ish juda murakkab`,
+      () => `Shaharda yangi qonun: qo‘shnining ovqatiga qarab turish taqiqlanadi`,
+      () => `Shahar aholisi rekord o‘rnatdi: bir kunda 1000 ta salom`,
+      () => `Shahar yangiliklari: bugun ham hech kim hech narsa qilmadi!`
+    ],
+
+    ru: [
+      () => `${n()} проснулся утром и решил снова поспать. Самое правильное решение!`,
+      () => `${n()} съел на завтрак 15 яиц. Курица до сих пор в шоке`,
+      () => `${n()} сыграл в шахматы с котом. Кот победил со счётом 5:0`,
+      () => `${n()} купил новый дом. Теперь копит деньги на сам дом`,
+      () => `${n()} попросил у соседа пароль от Wi-Fi. Сосед до сих пор думает`,
+      () => `${n()} объявил себя миллионером. На счету 3 монеты`,
+      () => `${n()} построил бассейн. Пока там плавает одна лягушка`,
+      () => `${n()} испёк торт. И сам же его съел`,
+      () => `${n()} купил новую машину. Только колёс у неё нет`,
+      () => `${n()} вышел на утреннюю пробежку. Устал через 10 секунд`,
+      () => `${n()} открыл холодильник. Внутри была только надежда`,
+      () => `${n()} зашёл к соседу. Просто забыл, где его собственный дом`,
+      () => `${n()} купил коту телефон. Теперь кот чаще бывает онлайн`,
+      () => `${n()} записался на забег 100 метров. Уснул, пока ждал старт`,
+      () => `${n()} открыл бизнес: продажа интернета воздуху`,
+      () => `${n()} поссорился со своей тенью. Теперь они не разговаривают`,
+      () => `${n()} поставил антенну на крышу. Поймал сигнал с Марса`,
+      () => `${n()} построил 20 домов за день. Строитель всё ещё спит`,
+      () => `${n()} взял у соседа картошку. До сих пор не вернул`,
+      () => `${n()} купил новый телефон. Первым сфотографировался кот`,
+      () => `${n()} проверил скорость интернета. Быстрее черепахи`,
+      () => `${n()} установил лифт в доме. Он ездит только вниз`,
+      () => `${n()} посадил бананы в саду. На следующий день вырос арбуз`,
+      () => `${n()} устроился на новую работу. В первый же день ушёл в отпуск`,
+      () => `${n()} покрасил дом. Теперь соседи носят солнечные очки`,
+      () => `${n()} повёл кота гулять. Кот выгулял хозяина`,
+      () => `${n()} приготовил плов. Даже казан пытается сбежать`,
+      () => `${n()} купил велосипед. Но забыл, как на нём ездить`,
+      () => `${n()} объявил себя президентом города. Выборов ещё не было`,
+      () => `${n()} поставил 10 дверей в доме. Не знает, какая входная`,
+      () => `${n()} заявил, что видел летающую рыбу. Свидетелей нет`,
+      () => `${n()} поздоровался с соседом. Сосед всё ещё печатает ответ`,
+      () => `${n()} собрал робота. Робот уволился в первый день`,
+      () => `${n()} искал телефон. Телефон был у него в руке`,
+      () => `${n()} установил камеру дома. Камера тоже уснула`,
+      () => `${n()} нашёл миллион. Потом понял, что это был сон`,
+      () => `${n()} построил дом коту. Кот переехал к соседу`,
+      () => `${n()} открыл магазин. Пока единственный покупатель — он сам`,
+      () => `${n()} посадил дерево. Оно выросло на крыше соседа`,
+      () => `${n()} купил мороженое. Первым его съело солнце`,
+      () => `${n()} сдал дом в аренду. Сам остался на улице`,
+      () => `${n()} поспал 5 часов и заявил, что очень устал`,
+      () => `${n()} купил новую одежду. Старая обиделась`,
+      () => `${n()} держал карту города вверх ногами и заблудился`,
+      () => `${n()} забыл номер своего дома. Теперь спрашивает соседей`,
+      () => `${n()} положил деньги в городской банк. Там теперь одно печенье`,
+      () => `${n()} построил самолёт. Он умеет летать только вниз`,
+      () => `${n()} устроил концерт во дворе. Зрители: два кота`,
+      () => `${n()} подарил соседу подарок. Внутри оказался ещё один подарок`,
+      () => `${n()} объявил себя детективом. Первое дело — пропавший носок`,
+      () => `${n()} ночью разговаривал с холодильником. Холодильник промолчал`,
+      () => `${n()} не заходил в интернет 3 дня. Все начали его искать`,
+      () => `${n()} создал сад. В нём пока только один кактус`,
+      () => `${n()} забрался на крышу и забыл, как спускаться`,
+      () => `${n()} дал имя соседскому коту. Кот не согласен`,
+      () => `${n()} объявил себя поваром. Даже яйцо сгорело`,
+      () => `${n()} пошёл гулять по городу и заблудился в собственном дворе`,
+      () => `${n()} нашёл 100 друзей. Все оказались ботами`,
+      () => `${n()} подключил интернет. Интернет тоже ушёл отдыхать`,
+      () => `${n()} решил продать солнцу солнечные очки. Солнце не ответило`,
+      () => `${n()} сегодня ничего не делал. Но очень устал`,
+      () => `${n()} убрался дома. Пыль переехала к соседу`,
+      () => `${n()} установил рекорд: 12 часов смотрел в телефон`,
+      () => `${n()} постучал в дверь. И забыл, что находится дома`,
+      () => `${n()} нанял помощника. Помощник тоже не пришёл на работу`,
+      () => `${n()} поймал большую рыбу. Рыба утащила его в воду`,
+      () => `${n()} поставил ракету во дворе. Соседи удивлены`,
+      () => `${n()} установил кондиционер. Теперь сидит и мёрзнет`,
+      () => `${n()} забыл пароль от нового телефона. Телефон обиделся`,
+      () => `${n()} заказал две пиццы. Курьер съел их по дороге`,
+      () => `${n()} стал самым быстрым бегуном города. Потому что больше никто не бегал`,
+      () => `${n()} нанял охранника. Охранник не пускает хозяина домой`,
+      () => `${n()} подарил городскому музею старый носок`,
+      () => `${n()} открыл спортзал. Пока там только стулья`,
+      () => `${n()} забыл про свой день рождения. Гости тоже забыли`,
+      () => `${n()} попросил у соседа сахар. Сосед дал соль`,
+      () => `${n()} посмотрел на небо и поздоровался с облаками`,
+      () => `${n()} выпустил новую песню. Даже микрофон сбежал`,
+      () => `${n()} участвовал в чемпионате города. Приз — одна морковка`,
+      () => `${n()} поставил 50 лампочек. Увидел счёт за электричество и заплакал`,
+      () => `${n()} выбрал себе новое имя. На следующий день передумал`,
+      () => `${n()} отправил кота на работу. Кот ушёл отдыхать`,
+      () => `${n()} нарисовал новую карту. На ней нет его собственного дома`,
+      () => `${n()} написал мэру: нужно больше выходных`,
+      () => `${n()} нашёл клад во дворе. Внутри носок и пуговица`,
+      () => `${n()} украл Wi-Fi соседа. Пароль: 12345678`,
+      () => `${n()} выпил 30 чашек чая. Теперь чайник его боится`,
+      () => `${n()} научился летать на велосипеде. Только во сне`,
+      () => `${n()} расширил дом. Теперь дверь осталась снаружи`,
+      () => `${n()} сегодня счастлив. Причина: интернет работает`,
+      () => `${n()} танцевал в центре города. Все выключили камеры`,
+      () => `${n()} купил новый компьютер. Компьютер умнее владельца`,
+      () => `${n()} ждёт снег во дворе. Сейчас вообще-то лето`,
+      () => `${n()} открыл новое кафе. В меню пока только вода`,
+      () => `${n()} починил крышу. Теперь у дома нет стен`,
+      () => `${n()} поздоровался с соседской собакой. Собака не ответила`,
+      () => `${n()} работал 10 минут и отдыхал 5 часов`,
+      () => `${n()} стал самым известным жителем города. Просто попал в новости`,
+      () => `В городе начались выборы котов. Все кандидаты уснули`,
+      () => `${O} хочет построить лифт в шалаше. Пока приходится пользоваться лестницей`,
+      () => `${O} ввёл новое правило: по понедельникам разрешается спать`,
+      () => `${O} устроил вечеринку в шалаше. Гости случайно зашли к соседу`,
+      () => `Жители просят ${O} построить новый бассейн. В старом уже живут рыбы`,
+      () => `Жители сегодня очень заняты: все читают новости!`,
+      () => `В городе уже ${NICKS.length.toLocaleString('ru-RU')} жителей. Теперь нужны магазины`,
+      () => `В центре города собрание. Главный вопрос: кому достанется последняя пицца?`,
+      () => `Сегодня в городе выходной. Даже коты не работают`,
+      () => `Городская полиция ищет пропавший носок. Дело очень сложное`,
+      () => `Новое правило города: запрещено смотреть на еду соседа`,
+      () => `Жители установили рекорд: 1000 приветствий за один день`,
+      () => `Новости города: сегодня опять никто ничего не делал!`
+    ]
+  };
+
+  const pickF = a => a[Math.floor(Math.random() * a.length)];
+  const el = $('#ntext');
+  const box = el?.parentElement;
+
+  if (el && box) {
+    let x = 0;
+    let w = 0;
+    let last = 0;
+    let currentLang = CONFIG.lang === 'ru' ? 'ru' : 'uz';
+
+    const fill = () => {
+      const list = news[currentLang] || news.uz;
+
+      el.innerHTML = Array.from(
+        { length: 8 },
+        () => `<span>${pickF(list)()}</span>`
+      ).join('');
+
+      w = el.scrollWidth;
+      x = box.clientWidth;
+    };
+
+    const changeLanguage = lang => {
+      currentLang = lang === 'ru' ? 'ru' : 'uz';
+      fill();
+    };
+
+    window.addEventListener('city-language-change', event => {
+      changeLanguage(event.detail?.lang);
+    });
+
+    const step = t => {
+      const dt = Math.min(0.05, (t - last) / 1000 || 0);
+      last = t;
+      x -= dt * 55;
+
+      if (x < -w) fill();
+
+      el.style.transform = `translate(${x}px,-50%)`;
+      requestAnimationFrame(step);
+    };
+
+    fill();
+    requestAnimationFrame(step);
+  }
 }
+
 
 // ---------- запуск ----------
 const applyClock = () => { const d = new Date(); setTime(QS.get('h') != null ? +QS.get('h') : d.getHours() + d.getMinutes() / 60); };
