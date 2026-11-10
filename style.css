@@ -83,3 +83,6 @@ header,#tools,.badge{transition:opacity .5s}
   header #msg{flex:1 0 100%;margin:0}
   header #msg:empty{display:none}
 }
+
+#lang{position:fixed;top:calc(env(safe-area-inset-top) + 12px);right:12px;z-index:8;width:auto;height:auto;padding:8px 14px;font-size:15px;border-radius:12px}
+header{padding-right:84px}

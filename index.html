@@ -1,330 +1,88 @@
-
 <!doctype html>
-<html lang="uz">
+<html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-
-<title>AnimZone — o‘z uyingizni toping</title>
-
-<meta name="description" content="AnimZone obunachilari shahri. Har bir obunachiga bitta uy. Nikingizni kiriting va uyingizni toping.">
-<meta property="og:title" content="AnimZone — o‘z uyingizni toping">
-<meta property="og:description" content="Har bir obunachiga bitta uy. O‘z uyingizni toping.">
+<title>BURXANGPT CITY — найди свой дом</title>
+<meta name="description" content="Город подписчиков burxangpt. Один подписчик — один дом. Введи свой ник и найди свой дом.">
+<meta property="og:title" content="BURXANGPT CITY — найди свой дом">
+<meta property="og:description" content="Один подписчик — один дом. Введи свой ник.">
 <meta name="theme-color" content="#1e1628">
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 <div id="labels"></div>
+<button class="ghost" id="lang" type="button" aria-label="Til / Язык">UZ</button>
 
 <header>
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-    <h1>
-      <span id="cityName"></span>
-      <small>
-        <span id="resLabel">aholisi</span>:
-        <span id="count">…</span>
-        ·
-        <span id="freeLabel">bo‘sh joylar</span>:
-        <span id="free">…</span>
-      </small>
-    </h1>
-
-    <button type="button" id="langToggle"
-      style="background:var(--gold);border:none;border-radius:8px;padding:8px 12px;font-weight:900;cursor:pointer;color:#1e1628;flex-shrink:0">
-      UZ / RU
-    </button>
-  </div>
-
+  <h1><span id="cityName"></span><small><span data-i18n="residents">жителей</span>: <span id="count">…</span> · <span data-i18n="free">свободно</span>: <span id="free">…</span></small></h1>
   <div id="wx"></div>
-
   <form id="f" autocomplete="off">
-    <input id="q" placeholder="Instagram nikingiz"
-      autocapitalize="none" spellcheck="false" enterkeyhint="search">
-    <button id="findBtnText">Topish</button>
+    <input id="q" data-i18n-ph="ph" placeholder="твой ник в Instagram" autocapitalize="none" spellcheck="false" enterkeyhint="search">
+    <button data-i18n="find">Найти</button>
   </form>
-
-  <div id="news">
-    <b id="newsTitleText">YANGILIKLAR</b>
-    <div class="nw"><div id="ntext"></div></div>
-  </div>
-
+  <div id="news"><b data-i18n="news">НОВОСТИ</b><div class="nw"><div id="ntext"></div></div></div>
   <div id="msg"></div>
 </header>
 
 <div id="tools">
-  <button class="ghost" id="zin" aria-label="Yaqinlashtirish">+</button>
-  <button class="ghost" id="zout" aria-label="Uzoqlashtirish">−</button>
-  <button class="ghost" id="overview" aria-label="Butun shahar">⌂</button>
+  <button class="ghost" id="zin" aria-label="+">+</button>
+  <button class="ghost" id="zout" aria-label="−">−</button>
+  <button class="ghost" id="overview" aria-label="⌂">⌂</button>
 </div>
 
 <div id="orbitbar" hidden>
-  <button class="ghost" id="oleft" aria-label="Chapga burish">⟲</button>
-  <span id="orbitHelp">Barmoq bilan aylantiring · 2 barmoq — masshtab</span>
-  <button class="ghost" id="oright" aria-label="O‘ngga burish">⟳</button>
-  <button class="ghost" id="oexit" aria-label="Orqaga">✕</button>
+  <button class="ghost" id="oleft" aria-label="⟲">⟲</button>
+  <span data-i18n="orbit">Крути пальцем · 2 пальца — зум</span>
+  <button class="ghost" id="oright" aria-label="⟳">⟳</button>
+  <button class="ghost" id="oexit" aria-label="✕">✕</button>
 </div>
 
 <section id="info" hidden>
   <div class="head">
-    <div>
-      <div id="nick"></div>
-      <div id="addr"></div>
-    </div>
-    <button class="ghost small" id="nbtn">Qo‘shnilar ▾</button>
+    <div><div id="nick"></div><div id="addr"></div></div>
+    <button class="ghost small" id="nbtn"></button>
   </div>
-
   <div id="status"></div>
   <div id="nbrs" hidden></div>
-
   <div class="row">
-    <a class="btn" id="profile" target="_blank" rel="noopener">Profil ↗</a>
-    <button id="share">Ulashish</button>
+    <a class="btn" id="profile" target="_blank" rel="noopener">Профиль ↗</a>
+    <button id="share" data-i18n="share">Поделиться</button>
   </div>
 </section>
 
 <section id="ghost" class="sheet" hidden>
-  <button class="x" id="gclose" aria-label="Yopish">✕</button>
-
-  <div class="big" id="ghostTitleText">
-    Siz shaharda hali yo‘qsiz
-  </div>
-
-  <div class="sub">
-    <span id="ghostSubStart"> </span>
-    <b id="gnick"></b>
-    <span id="ghostSubEnd"> uchun uchastka tayyor. </span>
-    <span class="owner"></span>
-    <span id="ghostSubLast"> sahifasiga obuna bo‘ling!</span>
-  </div>
-
-  <div class="row">
-    <a class="btn" id="gsub" target="_blank" rel="noopener">Obuna bo‘lish</a>
-  </div>
+  <button class="x" id="gclose" aria-label="✕">✕</button>
+  <div class="big" data-i18n="ghostTitle">Тебя пока нет в городе</div>
+  <div class="sub"><span data-i18n="ghostA">Участок для</span> <b id="gnick"></b> <span data-i18n="ghostB">уже размечен. Подпишись на</span> <span class="owner"></span><span data-i18n="ghostC">, и в следующем выпуске здесь вырастет твой дом.</span></div>
+  <div class="row"><a class="btn" id="gsub" target="_blank" rel="noopener" data-i18n="subscribe">Подписаться</a></div>
 </section>
 
-<div class="badge">
-  <span id="badgeText">Shahar har bir yangi son bilan o‘smoqda</span>
-  ·
-  <a id="badgeLink" target="_blank" rel="noopener"></a>
-</div>
+<div class="badge"><span data-i18n="badge">Город растёт с каждым выпуском ·</span> <a id="badgeLink" target="_blank" rel="noopener"></a></div>
 
 <div id="welcome">
-  <div class="hello">
-    <span id="welTitle">Xush kelibsiz</span>
-    <br>
-    <span id="cityName2"></span>
-    <small id="welSub">
-      Har bir obunachiga bitta uy. Sizning uyingiz tayyor.
-    </small>
-  </div>
-
+  <div class="hello"><span data-i18n="hello" data-html>Добро пожаловать<br>в </span><span id="cityName2"></span><small data-i18n="helloSub">Один подписчик — один дом. Твой уже стоит.</small></div>
   <div class="post">
     <div class="plank">
       <i></i><i></i>
-      <b id="welHeader">BU YERDA KIM YASHAYDI?</b>
-
+      <b data-i18n="plank">КТО ЗДЕСЬ ЖИВЁТ?</b>
       <form id="wf" autocomplete="off">
-        <input id="wq" placeholder="Instagram nikingiz"
-          autocapitalize="none" spellcheck="false" enterkeyhint="go">
-        <button id="welBtn">Uyimni topish</button>
+        <input id="wq" data-i18n-ph="ph" placeholder="твой ник в Instagram" autocapitalize="none" spellcheck="false" enterkeyhint="go">
+        <button data-i18n="findHome">Найти мой дом</button>
       </form>
     </div>
   </div>
-
-  <div class="hint" id="hintText">
-    Aholi soni: <span id="wcount">…</span>
-    · Markazda prokuratura, maydonda shahar egasining kulbasi
-  </div>
-
-  <button id="walk">Shahar bo‘ylab sayr qilish</button>
+  <div class="hint"><span data-i18n="hintA">Жителей:</span> <span id="wcount">…</span> · <span data-i18n="hintB">в центре города стоит прокуратура, а на площади — шалаш хозяина</span></div>
+  <button id="walk" data-i18n="walk">Просто погулять по городу</button>
 </div>
 
-<div id="loading">
-  <div>
-    <div>AnimZone</div>
-    <div class="lm" id="loadingText">Uylar qurilmoqda...</div>
-  </div>
-</div>
+<div id="loading"><div><div>BURXANGPT CITY</div><div class="lm" data-i18n="loading">Ставим дома…</div></div></div>
+<noscript><p style="position:fixed;inset:0;display:grid;place-items:center;color:#fff">Нужен JavaScript.</p></noscript>
 
-<noscript>
-  <p style="position:fixed;inset:0;display:grid;place-items:center;color:#fff">
-    JavaScript kerak.
-  </p>
-</noscript>
-
-<script type="importmap">
-{"imports":{"three":"./three.module.js"}}
-</script>
-
-<script type="module">
-import { CONFIG } from './config.js';
-
-const translations = {
-  uz: {
-    residents: 'aholisi',
-    free: 'bo‘sh joylar',
-    placeholder: 'Instagram nikingiz',
-    find: 'Topish',
-    news: 'YANGILIKLAR',
-    zoomIn: 'Yaqinlashtirish',
-    zoomOut: 'Uzoqlashtirish',
-    overview: 'Butun shahar',
-    orbitHelp: 'Barmoq bilan aylantiring · 2 barmoq — masshtab',
-    neighbor: 'Qo‘shnilar ▾',
-    profile: 'Profil ↗',
-    share: 'Ulashish',
-    close: 'Yopish',
-    ghostTitle: 'Siz shaharda hali yo‘qsiz',
-    ghostStart: ' ',
-    ghostEnd: ' uchun uchastka tayyor. ',
-    ghostLast: ' sahifasiga obuna bo‘ling!',
-    subscribe: 'Obuna bo‘lish',
-    badge: 'Shahar har bir yangi son bilan o‘smoqda',
-    welcome: 'Xush kelibsiz',
-    welcomeSub: 'Har bir obunachiga bitta uy. Sizning uyingiz tayyor.',
-    welcomeHeader: 'BU YERDA KIM YASHAYDI?',
-    welcomeBtn: 'Uyimni topish',
-    hint: 'Aholi soni:',
-    hintEnd: ' · Markazda prokuratura, maydonda shahar egasining kulbasi',
-    walk: 'Shahar bo‘ylab sayr qilish',
-    loading: 'Uylar qurilmoqda...',
-    noScript: 'JavaScript kerak.'
-  },
-
-  ru: {
-    residents: 'жителей',
-    free: 'свободно',
-    placeholder: 'твой ник в Instagram',
-    find: 'Найти',
-    news: 'НОВОСТИ',
-    zoomIn: 'Ближе',
-    zoomOut: 'Дальше',
-    overview: 'Весь город',
-    orbitHelp: 'Крути пальцем · 2 пальца — зум',
-    neighbor: 'Соседи ▾',
-    profile: 'Профиль ↗',
-    share: 'Поделиться',
-    close: 'Закрыть',
-    ghostTitle: 'Тебя пока нет в городе',
-    ghostStart: 'Участок для ',
-    ghostEnd: ' уже размечен. ',
-    ghostLast: ', и в следующем выпуске здесь вырастет твой дом.',
-    subscribe: 'Подписаться',
-    badge: 'Город растёт с каждым выпуском',
-    welcome: 'Добро пожаловать',
-    welcomeSub: 'Один подписчик — один дом. Твой уже стоит.',
-    welcomeHeader: 'КТО ЗДЕСЬ ЖИВЁТ?',
-    welcomeBtn: 'Найти мой дом',
-    hint: 'Жителей:',
-    hintEnd: ' · В центре города стоит прокуратура, а на площади — шалаш хозяина',
-    walk: 'Просто погулять по городу',
-    loading: 'Ставим дома...',
-    noScript: 'Нужен JavaScript.'
-  }
-};
-
-const $ = id => document.getElementById(id);
-
-let currentLang = 'uz';
-
-function setText(id, value) {
-  const element = $(id);
-  if (element) element.textContent = value;
-}
-
-function setLanguage(lang) {
-  if (!translations[lang]) return;
-
-    currentLang = lang;
-  document.documentElement.lang = lang;
-  CONFIG.lang = lang;
-  window.updateOfficeLanguage?.(lang);
-  window.dispatchEvent(
-    new CustomEvent('city-language-change', {
-      detail: { lang: lang }
-    })
-  );
-
-  const t = translations[lang];
-
-  setText('resLabel', t.residents);
-  setText('freeLabel', t.free);
-  setText('findBtnText', t.find);
-  setText('newsTitleText', t.news);
-  setText('nbtn', t.neighbor);
-  setText('profile', t.profile);
-  setText('share', t.share);
-  setText('ghostTitleText', t.ghostTitle);
-  setText('ghostSubStart', t.ghostStart);
-  setText('ghostSubEnd', t.ghostEnd);
-  setText('ghostSubLast', t.ghostLast);
-  setText('gsub', t.subscribe);
-  setText('badgeText', t.badge);
-  setText('welTitle', t.welcome);
-  setText('welSub', t.welcomeSub);
-  setText('welHeader', t.welcomeHeader);
-  setText('welBtn', t.welcomeBtn);
-  setText('walk', t.walk);
-  setText('loadingText', t.loading);
-  setText('orbitHelp', t.orbitHelp);
-
-  const hint = $('hintText');
-  if (hint) {
-    hint.innerHTML = '';
-    hint.append(document.createTextNode(t.hint + ' '));
-    const count = document.createElement('span');
-    count.id = 'wcount';
-    count.textContent = $('count')?.textContent || '…';
-    hint.append(count);
-    hint.append(document.createTextNode(t.hintEnd));
-  }
-
-  ['q', 'wq'].forEach(id => {
-    const el = $(id);
-    if (el) el.placeholder = t.placeholder;
-  });
-
-  $('zin')?.setAttribute('aria-label', t.zoomIn);
-  $('zout')?.setAttribute('aria-label', t.zoomOut);
-  $('overview')?.setAttribute('aria-label', t.overview);
-  $('gclose')?.setAttribute('aria-label', t.close);
-
-  const title = lang === 'uz'
-    ? 'AnimZone — o‘z uyingizni toping'
-    : 'AnimZone — найди свой дом';
-
-  document.title = title;
-  $('langToggle').textContent = lang === 'uz' ? 'UZ / RU' : 'RU / UZ';
-
-  const description = lang === 'uz'
-    ? 'AnimZone obunachilari shahri. Har bir obunachiga bitta uy.'
-    : 'Город подписчиков AnimZone. Один подписчик — один дом.';
-
-  document.querySelector('meta[name="description"]')
-    ?.setAttribute('content', description);
-
-  try {
-    localStorage.setItem('animzone-language', lang);
-  } catch (e) {}
-}
-
-$('langToggle')?.addEventListener('click', () => {
-  setLanguage(currentLang === 'uz' ? 'ru' : 'uz');
-});
-
-let savedLang = 'uz';
-try {
-  savedLang = localStorage.getItem('animzone-language') || 'uz';
-} catch (e) {}
-
-setLanguage(savedLang);
-</script>
-
+<script type="importmap">{"imports":{"three":"./three.module.js"}}</script>
 <script type="module" src="./app.js"></script>
 </body>
 </html>
