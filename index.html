@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>BURXANGPT CITY — найди свой дом</title>
+<meta name="description" content="Город подписчиков burxangpt. Один подписчик — один дом. Введи свой ник и найди свой дом.">
+<meta property="og:title" content="BURXANGPT CITY — найди свой дом">
+<meta property="og:description" content="Один подписчик — один дом. Введи свой ник.">
+<meta name="theme-color" content="#1e1628">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="labels"></div>
+
+<header>
+  <h1><span id="cityName"></span><small>жителей: <span id="count">…</span> · один подписчик — один дом</small></h1>
+  <div id="wx"></div>
+  <form id="f" autocomplete="off">
+    <input id="q" placeholder="твой ник в Instagram" autocapitalize="none" spellcheck="false" enterkeyhint="search">
+    <button>Найти</button>
+  </form>
+  <div id="news"><b>НОВОСТИ</b><div class="nw"><div id="ntext"></div></div></div>
+  <div id="msg"></div>
+</header>
+
+<div id="tools">
+  <button class="ghost" id="zin" aria-label="Ближе">+</button>
+  <button class="ghost" id="zout" aria-label="Дальше">−</button>
+  <button class="ghost" id="overview" aria-label="Весь город">⌂</button>
+</div>
+
+<div id="orbitbar" hidden>
+  <button class="ghost" id="oleft" aria-label="Повернуть влево">⟲</button>
+  <span>Крути пальцем · 2 пальца — зум</span>
+  <button class="ghost" id="oright" aria-label="Повернуть вправо">⟳</button>
+  <button class="ghost" id="oexit" aria-label="Назад">✕</button>
+</div>
+
+<section id="info" hidden>
+  <div class="head">
+    <div><div id="nick"></div><div id="addr"></div></div>
+    <button class="ghost small" id="nbtn">Соседи ▾</button>
+  </div>
+  <div id="status"></div>
+  <div id="nbrs" hidden></div>
+  <div class="row">
+    <a class="btn" id="profile" target="_blank" rel="noopener">Профиль ↗</a>
+    <button id="share">Поделиться</button>
+  </div>
+</section>
+
+<section id="ghost" class="sheet" hidden>
+  <button class="x" id="gclose" aria-label="Закрыть">✕</button>
+  <div class="big">Тебя пока нет в городе</div>
+  <div class="sub">Участок для <b id="gnick"></b> уже размечен. Подпишись на <span class="owner"></span>, и в следующем выпуске здесь вырастет твой дом.</div>
+  <div class="row"><a class="btn" id="gsub" target="_blank" rel="noopener">Подписаться</a></div>
+</section>
+
+<div class="badge">Город растёт с каждым выпуском · <a id="badgeLink" target="_blank" rel="noopener"></a></div>
+
+<div id="welcome">
+  <div class="hello">Добро пожаловать<br>в <span id="cityName2"></span><small>Один подписчик — один дом. Твой уже стоит.</small></div>
+  <div class="post">
+    <div class="plank">
+      <i></i><i></i>
+      <b>КТО ЗДЕСЬ ЖИВЁТ?</b>
+      <form id="wf" autocomplete="off">
+        <input id="wq" placeholder="твой ник в Instagram" autocapitalize="none" spellcheck="false" enterkeyhint="go">
+        <button>Найти мой дом</button>
+      </form>
+    </div>
+  </div>
+  <div class="hint">Жителей: <span id="wcount">…</span> · в центре города стоит шалаш хозяина</div>
+  <button id="walk">Просто погулять по городу</button>
+</div>
+
+<div id="loading"><div><div>BURXANGPT CITY</div><div class="lm">Ставим дома…</div></div></div>
+<noscript><p style="position:fixed;inset:0;display:grid;place-items:center;color:#fff">Нужен JavaScript.</p></noscript>
+
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
