@@ -460,18 +460,7 @@ let officeFlag;
     add(colGeo, stoneL, x, 6.4, 11.5); add(capGeo, stoneL, x, 11.35, 11.5); add(baseGeo, stoneL, x, 1.4, 11.5);
   }
   add(box(27.6, 1.6, 5.8), stoneL, 0, 12.4, 11.2);           // антаблемент и фриз с надписью
-  const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 128;
-  const cx = cv.getContext('2d');
-  cx.fillStyle = '#e9dfca'; cx.fillRect(0, 0, 2048, 128);
-  cx.fillStyle = '#7a5c22'; cx.font = '700 84px Georgia,"Times New Roman",serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
-  if ('letterSpacing' in cx) cx.letterSpacing = '26px';
-    const officeNames = {
-    uz: 'PROKURATURA',
-    ru: 'ПРОКУРАТУРА'
-  };
-
-  cx.fillText(officeNames[CONFIG.lang] || officeNames.uz, 1037, 70);
-  const ftex = new THREE.CanvasTexture(cv); ftex.colorSpace = THREE.SRGBColorSpace; ftex.anisotropy = 4;
+  
   function updateOfficeLanguage(lang) {
   cx.clearRect(0, 0, cv.width, cv.height);
 
