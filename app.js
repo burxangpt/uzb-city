@@ -505,7 +505,7 @@ let officeFlag;
   // Первоначальный язык
   updateOfficeLanguage(CONFIG.lang || 'uz');
 
-  const fr = new THREE.Mesh(new THREE.PlaneGeometry(26, 1.3), new THREE.MeshStandardMaterial({map: ftex, roughness: 0.8}));
+  const fr = new THREE.Mesh(new THREE.PlaneGeometry(26, 1.3), new THREE.MeshStandardMaterial({map: officeTexture, roughness: 0.8}));
   fr.position.set(0, 12.4, 14.12); office.add(fr);
   const sh = new THREE.Shape(); sh.moveTo(-14, 0); sh.lineTo(14, 0); sh.lineTo(0, 4.8); sh.lineTo(-14, 0);   // фронтон
   const ped = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, {depth: 5.8, bevelEnabled: false}), stoneL);
