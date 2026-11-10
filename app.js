@@ -150,7 +150,8 @@ ground.receiveShadow = true;
 scene.add(ground);
 
 // ---------- планировка: улицы, дома по обе стороны, площадь в центре ----------
-const STREET = 26, SP = 10, PLAZA = 38, SIDE = 8.5;
+const STREET = 26, SP = 10, PLAZA = 46, SIDE = 8.5;
+const TOTAL = CONFIG.totalPlots || 1000;      // город «обрезан» ровно на столько участков
 const cand = [];
 for (let k = -10; k <= 10; k++) {
   const z0 = k * STREET;
@@ -164,20 +165,37 @@ for (let k = -10; k <= 10; k++) {
   }
 }
 cand.sort((a, b) => a.d - b.d);
-const NH = NICKS.length - 1;                 // домов = ников минус хозяин
-const spots = cand.slice(0, NH);
-const R_CITY = Math.max(...spots.map((s) => Math.hypot(s.x, s.z))) + 14;
+const plots = cand.slice(0, TOTAL);
+const NH = Math.min(NICKS.length - 1, plots.length);   // занятые дома
+const NFREE = plots.length - NH;                       // свободные участки
+{
+  // свободные: внешний пояс города + немного случайных внутри
+  const isFree = new Array(plots.length).fill(false);
+  const outer = Math.max(0, NFREE - 80);
+  for (let i = plots.length - outer; i < plots.length; i++) isFree[i] = true;
+  let left = NFREE - outer;
+  const inner = plots.length - outer;
+  while (left > 0) { const i = Math.floor(rnd() * inner); if (!isFree[i]) { isFree[i] = true; left--; } }
+  plots.forEach((pl, i) => (pl.free = isFree[i]));
+}
+const R_CITY = Math.max(...plots.map((s) => Math.hypot(s.x, s.z))) + 14;
 
 const WALLS = ['#e9dcc0', '#f2efe8', '#b8814f', '#d9cbb0', '#a8553c', '#e7d6b4', '#a9c4cf', '#e2b48c', '#d8c3a5', '#cfd2d6', '#e8c9b0', '#c9b79c'];
 const ROOFS = ['#4a5568', '#2f343b', '#b5452f', '#2f6f73', '#5c636b', '#6f8f4e', '#8a4a3a', '#4a6a4a', '#c0392b', '#7a3a2c', '#3f5d7a', '#c8553d'];
 const DOORS = ['#c0392b', '#c98a4a', '#f0c060', '#4fc3c8', '#d86a8a', '#e07a40', '#3a3f47'];
 const TYPES = ['cottage', 'cottage', 'cottage', 'cottage', 'villa', 'villa', 'modern', 'modern', 'tower'];
 
-// улица: номер по порядку удаления от центра, дом: по порядку слева направо
+// улица: номер по порядку удаления от центра, дом/участок: по порядку слева направо
 const streetNo = (k) => (k === 0 ? 1 : 2 * Math.abs(k) + (k > 0 ? 0 : 1));
 const perStreet = new Map();
-spots.forEach((s) => { const n = streetNo(s.k); if (!perStreet.has(n)) perStreet.set(n, []); perStreet.get(n).push(s); });
+plots.forEach((s) => { const n = streetNo(s.k); if (!perStreet.has(n)) perStreet.set(n, []); perStreet.get(n).push(s); });
 perStreet.forEach((arr) => { arr.sort((a, b) => a.x - b.x); arr.forEach((s, i) => (s.num = i + 1)); });
+
+const spots = plots.filter((s) => !s.free);
+const FREE = plots.filter((s) => s.free).map((s) => ({
+  id: 0, kind: 'free', nickname: 'Свободный участок', reserved: null, x: s.x, z: s.z, rot: s.rot, h: 2, rh: 0,
+  street: streetNo(s.k), num: s.num, anchor: new THREE.Vector3(s.x, 3.6, s.z), center: new THREE.Vector3(s.x, 1, s.z),
+}));
 
 const HOUSES = spots.map((s, i) => {
   const type = pick(TYPES);
@@ -245,6 +263,23 @@ const doorMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1.15, 2.1, 0.1), 
 doorList.forEach(([x, z, r, c], i) => { dummy.rotation.set(0, r, 0); dummy.position.set(x, 1.05, z); dummy.scale.set(1, 1, 1); dummy.updateMatrix(); doorMesh.setMatrixAt(i, dummy.matrix); doorMesh.setColorAt(i, col.set(c)); });
 scene.add(winMesh, doorMesh);
 
+// ---------- свободные участки: пустой двор и табличка ----------
+const plotMesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(8.4, 7.4).rotateX(-Math.PI / 2), mat({roughness: 1}), Math.max(1, FREE.length));
+const stakeMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.18, 2.2, 0.18).translate(0, 1.1, 0), mat({color: 0x6b4a2a}), Math.max(1, FREE.length));
+const boardMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1.8, 1.0, 0.1), mat({roughness: 0.7}), Math.max(1, FREE.length));
+plotMesh.count = stakeMesh.count = boardMesh.count = FREE.length;
+FREE.forEach((f, i) => {
+  const c = Math.cos(f.rot);
+  dummy.rotation.set(0, f.rot, 0); dummy.scale.set(1, 1, 1);
+  dummy.position.set(f.x, 0.09, f.z); dummy.updateMatrix(); plotMesh.setMatrixAt(i, dummy.matrix);
+  plotMesh.setColorAt(i, col.set(pick(['#86a45e', '#97ad66', '#a9a574', '#8fae62'])));
+  dummy.position.set(f.x - 2.8 * c, 0, f.z + 3.1 * c); dummy.updateMatrix(); stakeMesh.setMatrixAt(i, dummy.matrix);
+  dummy.position.set(f.x - 2.8 * c, 2.0, f.z + 3.1 * c); dummy.updateMatrix(); boardMesh.setMatrixAt(i, dummy.matrix);
+  boardMesh.setColorAt(i, col.set('#ffcf7a'));
+});
+plotMesh.receiveShadow = true; stakeMesh.castShadow = boardMesh.castShadow = true;
+[plotMesh, stakeMesh, boardMesh].forEach((m) => { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; scene.add(m); });
+
 // ---------- дороги и фонари ----------
 function roadTexture() {
   const cv = document.createElement('canvas'); cv.width = 128; cv.height = 64;
@@ -292,7 +327,7 @@ for (let k = -10; k <= 10; k++) {
     const a = rnd() * Math.PI * 2, r = R_CITY + 6 + Math.pow(rnd(), 1.6) * 150;
     T.push([Math.cos(a) * r, Math.sin(a) * r, between(0.8, 1.7)]);
   }
-  for (let n = 0; n < 40; n++) { const a = rnd() * Math.PI * 2, r = between(25, 33); T.push([Math.cos(a) * r, Math.sin(a) * r, between(0.9, 1.4)]); }
+  for (let n = 0; n < 9; n++) T.push([30 + between(-10, 10), 31 + between(-8, 8), between(0.9, 1.4)]);
   const crown = new THREE.InstancedMesh(new THREE.ConeGeometry(1.6, 4, 7).translate(0, 3.6, 0), mat(), T.length);
   const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.22, 0.3, 1.8, 6).translate(0, 0.9, 0), mat({color: 0x6b4a2f}), T.length);
   const greens = ['#3f7a45', '#4d8a4a', '#2f6a3e', '#5b9650'];
@@ -308,14 +343,17 @@ for (let k = -10; k <= 10; k++) {
 const hut = new THREE.Group();
 let fireLight, flameA, flameB;
 {
-  // площадь: брусчатка и лужайка вокруг шалаша
-  const cob = (() => { const t = noiseTexture('#cfc2a2', [120, 100, 70], 128); t.repeat.set(10, 10); return t; })();
-  const plaza = new THREE.Mesh(new THREE.CircleGeometry(PLAZA - 2, 64), new THREE.MeshStandardMaterial({map: cob, roughness: 1}));
+  // площадь: брусчатка, лужайки, дорожка к зданию
+  const cob = (() => { const t = noiseTexture('#cfc2a2', [120, 100, 70], 128); t.repeat.set(12, 12); return t; })();
+  const plaza = new THREE.Mesh(new THREE.CircleGeometry(PLAZA - 2, 72), new THREE.MeshStandardMaterial({map: cob, roughness: 1}));
   plaza.rotation.x = -Math.PI / 2; plaza.position.y = 0.07; plaza.receiveShadow = true; scene.add(plaza);
-  const lawn = new THREE.Mesh(new THREE.CircleGeometry(21, 48), new THREE.MeshStandardMaterial({map: grassTex, roughness: 1}));
-  lawn.rotation.x = -Math.PI / 2; lawn.position.y = 0.1; lawn.receiveShadow = true; scene.add(lawn);
-  const rim = new THREE.Mesh(new THREE.RingGeometry(20.6, 21.6, 48), mat({color: 0x8a7a5c}));
-  rim.rotation.x = -Math.PI / 2; rim.position.y = 0.12; scene.add(rim);
+  const lawnMat = new THREE.MeshStandardMaterial({map: grassTex, roughness: 1});
+  for (const [lx, lz, lw, ld] of [[-30, 31, 26, 22], [30, 31, 26, 22], [0, -27, 64, 16]]) {
+    const l = new THREE.Mesh(new THREE.PlaneGeometry(lw, ld), lawnMat);
+    l.rotation.x = -Math.PI / 2; l.position.set(lx, 0.1, lz); l.receiveShadow = true; scene.add(l);
+  }
+  const path = new THREE.Mesh(new THREE.PlaneGeometry(9, 26), mat({color: 0xe2d6b8}));
+  path.rotation.x = -Math.PI / 2; path.position.set(0, 0.12, 31); path.receiveShadow = true; scene.add(path);
 
   // солома
   const cv = document.createElement('canvas'); cv.width = cv.height = 256;
@@ -391,25 +429,90 @@ let fireLight, flameA, flameB;
   const board = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.3, 0.2), [wood, wood, wood, wood, new THREE.MeshStandardMaterial({map: signTex, roughness: 0.9}), wood]);
   board.position.set(-6.2, 3.1, LEN / 2 + 2.3); board.rotation.y = 0.18; board.castShadow = true; hut.add(board);
 }
+hut.position.set(-30, 0, 28);
+hut.scale.setScalar(0.8);
 scene.add(hut);
-const HUT_ANCHOR = new THREE.Vector3(0, 9.2, 0);
-const OWNER = {id: 1, nickname: NICKS[0], kind: 'hut', anchor: HUT_ANCHOR, center: new THREE.Vector3(0, 3, 4), h: 8, street: 0, num: 0};
+const HUT_ANCHOR = new THREE.Vector3(-30, 7.6, 28);
+const OWNER = {id: 1, nickname: NICKS[0], kind: 'hut', anchor: HUT_ANCHOR, center: new THREE.Vector3(-30, 3, 31), h: 8, street: 0, num: 0};
+
+// ---------- ПРОКУРАТУРА в центре города ----------
+const office = new THREE.Group();
+let officeFlag;
+{
+  const stone = mat({color: 0xdccfb4}), stoneL = mat({color: 0xe9dfca}), stoneD = mat({color: 0xb9ac92}), wing = mat({color: 0xd3c5a8}), dark = mat({color: 0x5a4a3a});
+  const gold = mat({color: 0xd8a93c, roughness: 0.4, metalness: 0.45, emissive: 0x3a2a05});
+  const add = (geo, m, x, y, z, cast = true) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = cast; o.receiveShadow = true; office.add(o); return o; };
+  const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+  add(box(70, 1.2, 34), stoneD, 0, 0.6, 2);                  // платформа
+  add(box(38, 0.6, 3.2), stoneL, 0, 1.5, 15.6);              // ступени
+  add(box(32, 0.6, 2.4), stoneL, 0, 1.5, 13.3);
+  add(box(30, 12, 16), stone, 0, 7.2, 0);                    // центральный корпус
+  add(box(31.4, 0.9, 17.4), stoneL, 0, 13.65, 0);            // карниз
+  for (const s of [-1, 1]) {
+    add(box(18, 8.5, 14), wing, s * 24, 5.45, 0);            // крылья
+    add(box(18.8, 0.8, 14.8), stoneL, s * 24, 10.1, 0);
+    for (const row of [3.6, 7.0]) for (const c of [-6, -2, 2, 6]) add(box(1.5, 2.3, 0.12), glowMat, s * 24 + c, row + 1.2, 7.06, false);
+    for (const row of [3.6, 7.0]) for (const c of [-3, 3]) add(box(0.12, 2.3, 1.5), glowMat, s * 33.06, row + 1.2, c, false);
+  }
+  const colGeo = new THREE.CylinderGeometry(0.82, 0.9, 10.4, 18), capGeo = box(2.2, 0.5, 2.2), baseGeo = box(2.1, 0.4, 2.1);
+  for (let k = 0; k < 8; k++) {                              // колонны портика
+    const x = -12 + k * (24 / 7);
+    add(colGeo, stoneL, x, 6.4, 11.5); add(capGeo, stoneL, x, 11.35, 11.5); add(baseGeo, stoneL, x, 1.4, 11.5);
+  }
+  add(box(27.6, 1.6, 5.8), stoneL, 0, 12.4, 11.2);           // антаблемент и фриз с надписью
+  const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 128;
+  const cx = cv.getContext('2d');
+  cx.fillStyle = '#e9dfca'; cx.fillRect(0, 0, 2048, 128);
+  cx.fillStyle = '#7a5c22'; cx.font = '700 84px Georgia,"Times New Roman",serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  if ('letterSpacing' in cx) cx.letterSpacing = '26px';
+  cx.fillText('ПРОКУРАТУРА', 1037, 70);
+  const ftex = new THREE.CanvasTexture(cv); ftex.colorSpace = THREE.SRGBColorSpace; ftex.anisotropy = 4;
+  const fr = new THREE.Mesh(new THREE.PlaneGeometry(26, 1.3), new THREE.MeshStandardMaterial({map: ftex, roughness: 0.8}));
+  fr.position.set(0, 12.4, 14.12); office.add(fr);
+  const sh = new THREE.Shape(); sh.moveTo(-14, 0); sh.lineTo(14, 0); sh.lineTo(0, 4.8); sh.lineTo(-14, 0);   // фронтон
+  const ped = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, {depth: 5.8, bevelEnabled: false}), stoneL);
+  ped.position.set(0, 13.2, 8.4); ped.castShadow = ped.receiveShadow = true; office.add(ped);
+  const tym = new THREE.Mesh(new THREE.CircleGeometry(1.1, 24), gold); tym.position.set(0, 14.6, 14.22); office.add(tym);
+  add(box(4, 6.6, 0.2), dark, 0, 4.5, 8.06, false);          // двери и окна основного фасада
+  add(box(3.2, 5.8, 0.22), glowMat, 0, 4.2, 8.1, false);
+  for (const s of [-1, 1]) for (const c of [4.8, 8.2, 11.6]) add(box(1.5, 4.6, 0.12), glowMat, s * c, 7.4, 8.06, false);
+  add(new THREE.CylinderGeometry(6.6, 6.8, 4, 40), stone, 0, 16.1, 0);       // барабан и купол
+  add(new THREE.CylinderGeometry(7.1, 7.1, 0.6, 40), stoneL, 0, 18.3, 0);
+  for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2; const w = add(box(1.1, 2.2, 0.12), glowMat, Math.sin(a) * 6.62, 16.2, Math.cos(a) * 6.62, false); w.rotation.y = a; }
+  add(new THREE.SphereGeometry(6.7, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2), gold, 0, 18.6, 0);
+  add(new THREE.CylinderGeometry(1.15, 1.3, 2.4, 16), stoneL, 0, 25.5, 0);
+  add(new THREE.SphereGeometry(1.3, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), gold, 0, 26.7, 0);
+  add(new THREE.CylinderGeometry(0.08, 0.08, 4.6, 8), gold, 0, 29.2, 0, false);
+  const fc = document.createElement('canvas'); fc.width = 64; fc.height = 36;      // флаг
+  const fx = fc.getContext('2d'); fx.fillStyle = '#c6372f'; fx.fillRect(0, 0, 64, 36); fx.fillStyle = '#f3c64a'; fx.fillRect(0, 12, 64, 12);
+  const ftx = new THREE.CanvasTexture(fc); ftx.colorSpace = THREE.SRGBColorSpace;
+  const flagGeo = new THREE.PlaneGeometry(3.2, 1.8, 10, 2); flagGeo.translate(1.6, 0, 0);
+  officeFlag = new THREE.Mesh(flagGeo, new THREE.MeshBasicMaterial({map: ftx, side: THREE.DoubleSide}));
+  officeFlag.position.set(0.08, 30.6, 0); office.add(officeFlag);
+  const poleG = new THREE.CylinderGeometry(0.1, 0.14, 4.4, 8), bulbG = new THREE.SphereGeometry(0.38, 12, 8);   // фонари
+  for (const x of [-15, 15]) for (const z of [26, 38]) { add(poleG, dark, x, 2.2, z); add(bulbG, glowMat, x, 4.6, z, false); }
+}
+scene.add(office);
+const OFFICE = {id: 0, nickname: 'Прокуратура', kind: 'office', anchor: new THREE.Vector3(0, 33.6, 0), center: new THREE.Vector3(0, 12, 0), h: 30, street: 0, num: 0};
 
 // ---------- реестр ников ----------
 const ALL = [OWNER, ...HOUSES];
 const BY = new Map(ALL.map((h) => [h.nickname.toLowerCase(), h]));
+BY.set('прокуратура', OFFICE);
 
 // ---------- подписи над домами ----------
 const labelsEl = $('#labels');
 const POOL = MOBILE ? 40 : 72;
-const pool = Array.from({length: POOL}, () => { const d = document.createElement('div'); d.className = 'tag'; labelsEl.appendChild(d); return {el: d, ent: null}; });
-const heroTag = pool[0]; heroTag.el.classList.add('me'); heroTag.el.textContent = OWNER.nickname;
+const pool = Array.from({length: POOL}, () => { const d = document.createElement('div'); d.className = 'tag'; labelsEl.appendChild(d); return {el: d, ent: null, txt: ''}; });
+const heroes = [{ent: OWNER, tag: pool[0], text: OWNER.nickname, ref: 150}, {ent: OFFICE, tag: pool[1], text: 'Прокуратура', ref: 230}];
+heroes.forEach((h) => { h.tag.el.classList.add('me'); h.tag.el.textContent = h.text; });
 let selected = null;
 const _v = new THREE.Vector3();
 function updateLabels() {
   const W = innerWidth, H = innerHeight, cp = camera.position;
+  const list = selected && selected.kind === 'free' ? [...HOUSES, selected] : HOUSES;
   const cand2 = [];
-  for (const h of HOUSES) {
+  for (const h of list) {
     const dist = cp.distanceTo(h.anchor);
     if (dist > 260 && h !== selected) continue;
     _v.copy(h.anchor).project(camera);
@@ -418,30 +521,34 @@ function updateLabels() {
   }
   cand2.sort((a, b) => (a.h === selected ? -1 : b.h === selected ? 1 : a.dist - b.dist));
   const taken = [];
-  _v.copy(HUT_ANCHOR).project(camera);
-  if (_v.z < 1 && Math.abs(_v.x) < 1.2 && _v.y < 1.3 && _v.y > -1.3) {
-    const x = (_v.x * 0.5 + 0.5) * W, y = (-_v.y * 0.5 + 0.5) * H;
-    const sc = clamp(150 / cp.distanceTo(HUT_ANCHOR) + 0.4, 0.8, 1.35);
-    heroTag.el.style.display = 'block';
-    heroTag.el.style.transform = `translate(${x.toFixed(1)}px,${(y - 8).toFixed(1)}px) translate(-50%,-100%) scale(${sc.toFixed(3)})`;
-    taken.push({x0: x - 80 * sc, x1: x + 80 * sc, y0: y - 44 * sc, y1: y});
-  } else heroTag.el.style.display = 'none';
-  let used = 1;
+  for (const hr of heroes) {
+    _v.copy(hr.ent.anchor).project(camera);
+    if (_v.z < 1 && Math.abs(_v.x) < 1.2 && _v.y < 1.3 && _v.y > -1.3) {
+      const x = (_v.x * 0.5 + 0.5) * W, y = (-_v.y * 0.5 + 0.5) * H;
+      const sc = clamp(hr.ref / cp.distanceTo(hr.ent.anchor) + 0.4, 0.8, 1.35);
+      hr.tag.el.style.display = 'block';
+      hr.tag.el.style.transform = `translate(${x.toFixed(1)}px,${(y - 8).toFixed(1)}px) translate(-50%,-100%) scale(${sc.toFixed(3)})`;
+      taken.push({x0: x - 80 * sc, x1: x + 80 * sc, y0: y - 44 * sc, y1: y});
+    } else hr.tag.el.style.display = 'none';
+  }
+  let used = heroes.length;
   for (const c of cand2) {
     if (used >= POOL) break;
+    const text = c.h.kind === 'free' ? c.h.reserved : c.h.nickname;
+    if (!text) continue;
     const sc = clamp(95 / c.dist + 0.3, 0.7, 1.15);
-    const w = (c.h.nickname.length * 7.6 + 26) * sc, hh = 26 * sc;
+    const w = (text.length * 7.6 + 26) * sc, hh = 26 * sc;
     const r = {x0: c.x - w / 2, x1: c.x + w / 2, y0: c.y - hh - 8, y1: c.y};
     if (c.h !== selected && taken.some((t) => r.x0 < t.x1 && r.x1 > t.x0 && r.y0 < t.y1 && r.y1 > t.y0)) continue;
     taken.push(r);
     const p = pool[used++];
-    if (p.ent !== c.h) { p.el.textContent = c.h.nickname; p.ent = c.h; }
+    if (p.txt !== text) { p.el.textContent = text; p.txt = text; }
     p.el.style.display = 'block';
     p.el.style.transform = `translate(${c.x.toFixed(1)}px,${(c.y - 8).toFixed(1)}px) translate(-50%,-100%) scale(${sc.toFixed(3)})`;
     p.el.style.opacity = c.dist > 200 ? clamp(1 - (c.dist - 200) / 60) : 1;
     p.el.classList.toggle('me', c.h === selected);
   }
-  for (let i = used; i < POOL; i++) { if (pool[i].ent !== null) { pool[i].el.style.display = 'none'; pool[i].ent = null; } else pool[i].el.style.display = 'none'; }
+  for (let i = used; i < POOL; i++) { pool[i].el.style.display = 'none'; pool[i].txt = ''; }
 }
 
 // ---------- камера: режимы и перелёты ----------
@@ -452,7 +559,7 @@ function setMode(m) {
     controls.mouseButtons = {LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN};
     controls.touches = {ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN};
     controls.enablePan = false; controls.zoomToCursor = false;
-    controls.minDistance = 9; controls.maxDistance = 90; controls.rotateSpeed = 1;
+    controls.minDistance = 9; controls.maxDistance = 140; controls.rotateSpeed = 1;
   } else {
     controls.mouseButtons = {LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE};
     controls.touches = {ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE};
@@ -471,7 +578,7 @@ function stepFly(now) {
   if (k >= 1) fly = null;
 }
 controls.addEventListener('start', () => { fly = null; controls.autoRotate = false; });
-const HOME_T = new THREE.Vector3(0, 6, 8), HOME_O = new THREE.Vector3(0, 30, 74);
+const HOME_T = new THREE.Vector3(0, 10, 14), HOME_O = new THREE.Vector3(0, 42, 112);
 camera.position.copy(HOME_T).add(HOME_O); controls.target.copy(HOME_T);
 setMode('free'); controls.update();
 
@@ -491,13 +598,14 @@ function orbitBy(a) {
 const info = $('#info'), msg = $('#msg'), ghost = $('#ghost');
 const orbitOff = (h) => {
   const portrait = innerWidth <= innerHeight, k = portrait ? 1.6 : 1;
+  if (h.kind === 'office') return new THREE.Vector3(0, 32, 100).multiplyScalar(portrait ? 1.3 : 1);
   if (h.kind === 'hut') { const d = (portrait ? 46 : 34); return new THREE.Vector3(d * 0.15, d * 0.38, d); }
   // камера встаёт в просвет между рядами домов и смотрит сверху: дома другого ряда не загораживают
   const f = Math.cos(h.rot) >= 0 ? 1 : -1;
   return new THREE.Vector3(2.5, Math.max(15, h.h + h.rh + 5) * (portrait ? 1.35 : 1), f * 21.5);
 };
 function neighbours(h) {
-  if (h.kind === 'hut') return HOUSES.slice(0, 4);
+  if (h.kind !== 'house') return HOUSES.slice(0, 4);
   return HOUSES.filter((x) => x !== h && x.street === h.street).sort((a, b) => Math.hypot(a.x - h.x, a.z - h.z) - Math.hypot(b.x - h.x, b.z - h.z)).slice(0, 5);
 }
 function placeBars() {
@@ -508,24 +616,25 @@ function placeBars() {
 addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); requestAnimationFrame(placeBars); });
 
 function showInfo(h) {
-  $('#nick').textContent = h.nickname;
-  const hut_ = h.kind === 'hut';
-  $('#addr').textContent = hut_ ? 'Шалаш хозяина · центр города' : `Улица ${h.street} · дом ${h.num}`;
-  $('#status').textContent = hut_ ? 'Хозяин города. Здесь всё началось.' : `Житель №${h.id} из ${NICKS.length}`;
+  const k = h.kind;
+  $('#nick').textContent = k === 'free' ? (h.reserved || 'Свободный участок') : h.nickname;
+  $('#addr').textContent = k === 'hut' ? 'Шалаш хозяина · на площади' : k === 'office' ? 'Здание в центре города' : k === 'free' ? `Улица ${h.street} · участок ${h.num}` : `Улица ${h.street} · дом ${h.num}`;
+  $('#status').textContent = k === 'hut' ? 'Хозяин города. Здесь всё началось.' : k === 'office' ? 'Главное здание города.' : k === 'free' ? `Свободен. Подпишись на @${CONFIG.channelHandle}, и здесь вырастет твой дом.` : `Житель №${h.id} из ${NICKS.length}`;
   const pr = $('#profile');
-  pr.href = hut_ ? CONFIG.channelUrl : CONFIG.profileUrl(h.nickname);
-  pr.textContent = hut_ ? 'Подписаться ↗' : 'Профиль ↗';
+  pr.href = k === 'house' ? CONFIG.profileUrl(h.nickname) : CONFIG.channelUrl;
+  pr.textContent = k === 'house' ? 'Профиль ↗' : 'Подписаться ↗';
   $('#nbrs').hidden = true; $('#nbtn').textContent = 'Соседи ▾';
+  $('#nbtn').hidden = k === 'free';
   $('#nbrs').innerHTML = neighbours(h).map((x) => `<button class="chip" data-n="${x.nickname}">${x.nickname}</button>`).join('');
   info.hidden = false;
-  history.replaceState(null, '', location.pathname + location.search + '#' + h.nickname);
+  if (k !== 'free') history.replaceState(null, '', location.pathname + location.search + '#' + h.nickname);
   requestAnimationFrame(placeBars);
 }
 function inspect(h) {
   selected = h; ghost.hidden = true; msg.textContent = '';
   setMode('orbit');
   const c = h.center;
-  flyTo(new THREE.Vector3(c.x, Math.min(c.y, 4), c.z), orbitOff(h), 2200);
+  flyTo(new THREE.Vector3(c.x, h.kind === 'office' ? c.y : Math.min(c.y, 4), c.z), orbitOff(h), 2200);
   showInfo(h);
   $('#orbitbar').hidden = false;
   const sp = $('#orbitbar span'); sp.style.display = '';
@@ -541,7 +650,7 @@ function overview() {
   selected = null; info.hidden = true; ghost.hidden = true; msg.textContent = '';
   setMode('free'); $('#orbitbar').hidden = true;
   history.replaceState(null, '', location.pathname + location.search);
-  flyTo(new THREE.Vector3(0, 6, 8), new THREE.Vector3(0, 120, 210), 2200);
+  flyTo(new THREE.Vector3(0, 10, 14), new THREE.Vector3(0, 150, 250), 2200);
   requestAnimationFrame(placeBars);
 }
 function find(q) {
@@ -557,6 +666,13 @@ function find(q) {
   }
   msg.textContent = '';
   $('#gnick').textContent = q; ghost.hidden = false; info.hidden = true;
+  const f0 = FREE[0];
+  if (f0) {
+    FREE.forEach((f) => (f.reserved = null)); f0.reserved = q;
+    selected = f0; setMode('orbit');
+    flyTo(new THREE.Vector3(f0.x, 2, f0.z), orbitOff(f0), 2200);
+    $('#orbitbar').hidden = false;
+  }
 }
 
 $('#wf').addEventListener('submit', (e) => { e.preventDefault(); const v = $('#wq').value.trim(); if (!v) return; $('#q').value = v; $('#welcome').classList.add('gone'); controls.autoRotate = false; find(v); });
@@ -593,12 +709,17 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   if (moved > 6 || dt > 600 || e.button !== 0) return;
   ndc.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
   ray.setFromCamera(ndc, camera);
-  const hits = ray.intersectObjects([wallsMesh, ...Object.values(roofMeshes), hut], true);
+  const hits = ray.intersectObjects([wallsMesh, ...Object.values(roofMeshes), plotMesh, hut, office], true);
   if (!hits.length) return;
   const o = hits[0].object;
   let ent = null;
   if (o === wallsMesh) ent = HOUSES[hits[0].instanceId];
-  else { const key = Object.keys(roofMeshes).find((k) => roofMeshes[k] === o); ent = key ? roofDefs[key].list[hits[0].instanceId] : (hut.children.includes(o) ? OWNER : null); }
+  else if (o === plotMesh) ent = FREE[hits[0].instanceId];
+  else {
+    const key = Object.keys(roofMeshes).find((k) => roofMeshes[k] === o);
+    if (key) ent = roofDefs[key].list[hits[0].instanceId];
+    else { let q = o; while (q && q !== hut && q !== office) q = q.parent; ent = q === hut ? OWNER : q === office ? OFFICE : null; }
+  }
   if (!ent) return;
   $('#welcome').classList.add('gone'); controls.autoRotate = false;
   if (mode === 'orbit' && ent === selected) return;
@@ -651,6 +772,7 @@ function frame(now) {
   sun.position.copy(controls.target).addScaledVector(SUN_DIR, 300);
   sun.target.position.copy(controls.target); sun.target.updateMatrixWorld();
   const t = now / 1000;
+  { const ps = officeFlag.geometry.attributes.position; for (let i = 0; i < ps.count; i++) { const x = ps.getX(i); ps.setZ(i, Math.sin(x * 2.2 - t * 4) * 0.18 * x / 3.2); } ps.needsUpdate = true; }
   flameA.scale.set(1 + Math.sin(t * 11) * 0.12, 1 + Math.sin(t * 7.3) * 0.18, 1 + Math.cos(t * 9) * 0.12);
   flameB.scale.set(1 + Math.sin(t * 13) * 0.15, 1 + Math.sin(t * 9.1) * 0.22, 1);
   fireLight.position.y = 2.2 + Math.sin(t * 15) * 0.15;
@@ -666,4 +788,5 @@ if (location.hash.length > 1) {
   $('#q').value = decodeURIComponent(location.hash.slice(1));
   find($('#q').value);
 }
-window.__city = {camera, controls, HOUSES, OWNER, inspect, find, overview, setTime};
+$('#free').textContent = FREE.length;
+window.__city = {camera, controls, HOUSES, FREE, OWNER, OFFICE, inspect, find, overview, setTime};
