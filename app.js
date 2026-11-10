@@ -461,31 +461,50 @@ let officeFlag;
   }
   add(box(27.6, 1.6, 5.8), stoneL, 0, 12.4, 11.2);           // антаблемент и фриз с надписью
   
+ 
+  // Текстура надписи прокуратуры
+  const officeCanvas = document.createElement('canvas');
+  officeCanvas.width = 2048;
+  officeCanvas.height = 128;
+
+  const officeCtx = officeCanvas.getContext('2d');
+
+  const officeTexture = new THREE.CanvasTexture(officeCanvas);
+  officeTexture.colorSpace = THREE.SRGBColorSpace;
+
   function updateOfficeLanguage(lang) {
-  cx.clearRect(0, 0, cv.width, cv.height);
+    officeCtx.clearRect(0, 0, officeCanvas.width, officeCanvas.height);
 
-  cx.fillStyle = '#e9dfca';
-  cx.fillRect(0, 0, 2048, 128);
+    officeCtx.fillStyle = '#e9dfca';
+    officeCtx.fillRect(0, 0, officeCanvas.width, officeCanvas.height);
 
-  cx.fillStyle = '#7a5c22';
-  cx.font = '700 84px Georgia,"Times New Roman",serif';
-  cx.textAlign = 'center';
-  cx.textBaseline = 'middle';
+    officeCtx.fillStyle = '#7a5c22';
+    officeCtx.font = '700 84px Georgia, "Times New Roman", serif';
+    officeCtx.textAlign = 'center';
+    officeCtx.textBaseline = 'middle';
 
-  if ('letterSpacing' in cx) cx.letterSpacing = '26px';
+    if ('letterSpacing' in officeCtx) {
+      officeCtx.letterSpacing = '12px';
+    }
 
-  cx.fillText(
-    lang === 'ru' ? 'ПРОКУРАТУРА' : 'PROKURATURA',
-    1037,
-    70
-  );
+    officeCtx.fillText(
+      lang === 'ru' ? 'ПРОКУРАТУРА' : 'PROKURATURA',
+      officeCanvas.width / 2,
+      officeCanvas.height / 2
+    );
 
-  ftex.needsUpdate = true;
-}
+    officeTexture.needsUpdate = true;
+  }
 
-window.addEventListener('city-language-change', (event) => {
-  updateOfficeLanguage(event.detail.lang);
-});
+  window.updateOfficeLanguage = updateOfficeLanguage;
+
+  window.addEventListener('city-language-change', (event) => {
+    updateOfficeLanguage(event.detail?.lang || 'uz');
+  });
+
+  // Первоначальный язык
+  updateOfficeLanguage(CONFIG.lang || 'uz');
+
   const fr = new THREE.Mesh(new THREE.PlaneGeometry(26, 1.3), new THREE.MeshStandardMaterial({map: ftex, roughness: 0.8}));
   fr.position.set(0, 12.4, 14.12); office.add(fr);
   const sh = new THREE.Shape(); sh.moveTo(-14, 0); sh.lineTo(14, 0); sh.lineTo(0, 4.8); sh.lineTo(-14, 0);   // фронтон
