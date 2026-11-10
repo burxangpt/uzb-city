@@ -1,6 +1,6 @@
 // BURXANGPT CITY — 3D-город подписчиков на Three.js. Дома — жители, в центре — шалаш хозяина.
 import * as THREE from 'three';
-import {OrbitControls} from './vendor/OrbitControls.js';
+import {OrbitControls} from './OrbitControls.js';
 import {NICKS} from './data.js';
 import {CONFIG} from './config.js';
 
