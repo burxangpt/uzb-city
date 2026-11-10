@@ -1,4 +1,4 @@
-// BURXANGPT CITY — 3D-город подписчиков на Three.js. Дома — жители, в центре — шалаш хозяина.
+// AnimZone — 3D-город подписчиков на Three.js. Дома — жители, в центре — шалаш хозяина.
 import * as THREE from 'three';
 import {OrbitControls} from './OrbitControls.js';
 import {NICKS} from './data.js';
