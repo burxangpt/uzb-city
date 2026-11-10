@@ -240,9 +240,15 @@ function setText(id, value) {
 function setLanguage(lang) {
   if (!translations[lang]) return;
 
-  currentLang = lang;
+    currentLang = lang;
   document.documentElement.lang = lang;
   CONFIG.lang = lang;
+
+  window.dispatchEvent(
+    new CustomEvent('city-language-change', {
+      detail: { lang: lang }
+    })
+  );
 
   const t = translations[lang];
 
