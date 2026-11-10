@@ -1,4 +1,4 @@
-// BURXANGPT CITY — 3D-город подписчиков на Three.js. Дома — жители, в центре — шалаш хозяина.
+// 3D-город подписчиков на Three.js. Дома — жители, в центре — шалаш хозяина.
 import * as THREE from 'three';
 import {OrbitControls} from './OrbitControls.js';
 import {NICKS} from './data.js';
@@ -17,7 +17,7 @@ const QS = new URLSearchParams(location.search);
 // ---------- язык: русский / o‘zbekcha ----------
 const STR = {
   ru: {
-    title: 'BURXANGPT CITY — найди свой дом', residents: 'жителей', free: 'свободно', ph: 'твой ник в Instagram', find: 'Найти', news: 'НОВОСТИ',
+    title: CONFIG.cityName + ' — найди свой дом', residents: 'жителей', free: 'свободно', ph: 'твой ник в Instagram', find: 'Найти', news: 'НОВОСТИ',
     orbit: 'Крути пальцем · 2 пальца — зум', neighbours: 'Соседи', share: 'Поделиться', copied: 'Ссылка скопирована', profile: 'Профиль ↗',
     subscribe: 'Подписаться', subscribeArrow: 'Подписаться ↗', ghostTitle: 'Тебя пока нет в городе', ghostA: 'Участок для',
     ghostB: 'уже размечен. Подпишись на', ghostC: ', и в следующем выпуске здесь вырастет твой дом.', badge: 'Город растёт с каждым выпуском ·',
@@ -30,7 +30,7 @@ const STR = {
     nearMiss: 'Точного совпадения нет. Может, ты:', shareText: (c) => 'Мой дом в ' + c + ':', night: 'ночь', morning: 'утро', day: 'день', evening: 'вечер',
   },
   uz: {
-    title: 'BURXANGPT CITY — uyingni top', residents: 'aholi', free: 'bo‘sh', ph: 'Instagramdagi niking', find: 'Topish', news: 'YANGILIKLAR',
+    title: CONFIG.cityName + ' — uyingni top', residents: 'aholi', free: 'bo‘sh', ph: 'Instagramdagi niking', find: 'Topish', news: 'YANGILIKLAR',
     orbit: 'Barmoq bilan aylantir · 2 barmoq — zoom', neighbours: 'Qo‘shnilar', share: 'Ulashish', copied: 'Havola nusxalandi', profile: 'Profil ↗',
     subscribe: 'Obuna bo‘l', subscribeArrow: 'Obuna bo‘l ↗', ghostTitle: 'Sen hali shaharda yo‘qsan', ghostA: '',
     ghostB: 'uchun uchastka allaqachon belgilab qo‘yilgan. Obuna bo‘l:', ghostC: ' — keyingi sonda shu yerda uying paydo bo‘ladi.', badge: 'Shahar har bir sonda o‘sadi ·',
@@ -44,7 +44,8 @@ const STR = {
   },
 };
 let LANG = 'ru';
-try { LANG = localStorage.getItem('lang') || ((navigator.language || '').toLowerCase().startsWith('uz') ? 'uz' : 'ru'); } catch (e) {}
+LANG = CONFIG.lang === 'ru' ? 'ru' : 'uz';          // язык по умолчанию задаётся в config.js
+try { const sv = localStorage.getItem('lang'); if (sv === 'uz' || sv === 'ru') LANG = sv; } catch (e) {}
 if (QS.get('lang') === 'uz' || QS.get('lang') === 'ru') LANG = QS.get('lang');
 const t = (k, ...a) => { const v = STR[LANG][k]; return typeof v === 'function' ? v(...a) : v; };
 function applyStatic() {
@@ -52,7 +53,7 @@ function applyStatic() {
   document.title = t('title');
   document.querySelectorAll('[data-i18n]').forEach((e) => { const v = t(e.dataset.i18n); if (e.hasAttribute('data-html')) e.innerHTML = v; else e.textContent = v; });
   document.querySelectorAll('[data-i18n-ph]').forEach((e) => (e.placeholder = t(e.dataset.i18nPh)));
-  $('#lang').textContent = LANG === 'ru' ? 'UZ' : 'RU';
+  const lb = $('#lang'); if (lb) lb.textContent = LANG === 'ru' ? 'UZ' : 'RU';
 }
 applyStatic();
 
