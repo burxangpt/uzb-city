@@ -472,6 +472,31 @@ let officeFlag;
 
   cx.fillText(officeNames[CONFIG.lang] || officeNames.uz, 1037, 70);
   const ftex = new THREE.CanvasTexture(cv); ftex.colorSpace = THREE.SRGBColorSpace; ftex.anisotropy = 4;
+  function updateOfficeLanguage(lang) {
+  cx.clearRect(0, 0, cv.width, cv.height);
+
+  cx.fillStyle = '#e9dfca';
+  cx.fillRect(0, 0, 2048, 128);
+
+  cx.fillStyle = '#7a5c22';
+  cx.font = '700 84px Georgia,"Times New Roman",serif';
+  cx.textAlign = 'center';
+  cx.textBaseline = 'middle';
+
+  if ('letterSpacing' in cx) cx.letterSpacing = '26px';
+
+  cx.fillText(
+    lang === 'ru' ? 'ПРОКУРАТУРА' : 'PROKURATURA',
+    1037,
+    70
+  );
+
+  ftex.needsUpdate = true;
+}
+
+window.addEventListener('city-language-change', (event) => {
+  updateOfficeLanguage(event.detail.lang);
+});
   const fr = new THREE.Mesh(new THREE.PlaneGeometry(26, 1.3), new THREE.MeshStandardMaterial({map: ftex, roughness: 0.8}));
   fr.position.set(0, 12.4, 14.12); office.add(fr);
   const sh = new THREE.Shape(); sh.moveTo(-14, 0); sh.lineTo(14, 0); sh.lineTo(0, 4.8); sh.lineTo(-14, 0);   // фронтон
