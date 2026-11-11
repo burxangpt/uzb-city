@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import {OrbitControls} from './OrbitControls.js';
 import {NICKS} from './data.js';
 import {CONFIG} from './config.js';
+import { getNewsList } from './newsData.js';
 
 const $ = (s) => document.querySelector(s);
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
