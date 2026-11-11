@@ -771,94 +771,12 @@ renderer.domElement.addEventListener('pointerup', (e) => {
 });
 
 // ---------- новости города (ru / uz) ----------
-const NEWS = (() => {
-  const names = NICKS.slice(1);
-  const n = () => `<i>@${names[Math.floor(Math.random() * names.length)]}</i>`;
-  const O = `<i>@${CONFIG.owner}</i>`;
-  const st = () => 1 + Math.floor(Math.random() * 20);
-  return {
-    ru: [
-      () => `${n()} проспал: будильник съел кот`,
-      () => `${n()} испёк торт размером с дом. Соседи уже в очереди`,
-      () => `${n()} нашёл во дворе клад: три монеты и старый носок`,
-      () => `Хозяин шалаша ${O} опять жарит что-то на костре. Запах на весь город`,
-      () => `Кто-то разрисовал забор на улице ${st()}. Улики ведут к коту`,
-      () => `${n()} и ${n()} поспорили, чей двор красивее. Спор продолжается`,
-      () => `${n()} купил газонокосилку и подстриг полгорода`,
-      () => `${n()} завёл хомяка. Хомяк уже богаче хозяина`,
-      () => `${n()} потерял ключи. Нашлись в холодильнике ${n()}`,
-      () => `Жители просят ${O} построить в шалаше второй этаж. Хозяин думает`,
-      () => `${n()} поставил на крышу антенну и поймал радио из 1997 года`,
-      () => `Кот ${n()} сбежал и теперь живёт у трёх соседей сразу`,
-      () => `${n()} пытался перекрасить дом ночью. Получилось в горошек`,
-      () => `В городе уже ${NICKS.length.toLocaleString('ru-RU')} жителей. Тесновато, но весело`,
-      () => `Мэр города (он же ${O}) просит не кормить голубей монетами`,
-      () => `У шалаша ${O} горит костёр, а значит, все приглашены`,
-      () => `${n()} вчера целый час спорил с попугаем. Попугай победил`,
-      () => `${n()} и ${n()} открыли клуб любителей поспать до обеда. Первое заседание перенесли на завтра`,
-      () => `${n()} нашёл на крыше мячик, которого там не было. Соседи в недоумении`,
-      () => `Над улицей ${st()} прошёл дождь из лепёшек. Синоптики разводят руками`,
-      () => `${n()} учит кота говорить «салом». Кот пока отвечает «мяу», но делает успехи`,
-      () => `В городе открылся магазин, где всё стоит 1 000 сум. Очередь уже у шалаша`,
-      () => `${n()} решил построить второй этаж. Про первый забыл`,
-      () => `Хозяин шалаша ${O} объявил: кто найдёт свой ник на крыше, получит лепёшку`,
-      () => `${n()} вышел за хлебом, а вернулся с гитарой. Соседи просят вернуть хлеб`,
-      () => `Жители улицы ${st()} вышли на субботник. Работал один ${n()}, остальные болели за него`,
-      () => `${n()} утверждает, что видел летающий чайник над прокуратурой. Проверка идёт`,
-      () => `Прокуратура расследует пропажу последнего пирожка. Главный подозреваемый — ${n()}`,
-      () => `${n()} выиграл конкурс «Самый громкий смех во дворе». Соседи в шоке и без сна`,
-      () => `Новый рекорд: ${n()} дошёл от дома до шалаша за 3 часа. Остановился поговорить с каждым`,
-      () => `${n()} потерял тапок. Тапок нашёл новую семью у ${n()}`,
-      () => `Бабушки с улицы ${st()} подтвердили: ${n()} опять забыл выключить свет`,
-      () => `Горожане просят увеличить число свободных участков. Хозяин ${O} обещает подумать`,
-      () => `${n()} поспорил на плов, что обойдёт город за час. Плов проиграл`,
-      () => `У ${n()} во дворе вырос арбуз размером с будку. Собаку уже переселили`,
-      () => `Директор городского радио ${n()} случайно включил аудиокнигу вместо новостей`,
-    ],
-    uz: [
-      () => `${n()} uxlab qoldi: budilnikni mushuk yeb qo‘ydi`,
-      () => `${n()} uyday katta tort yopdi. Qo‘shnilar allaqachon navbatda`,
-      () => `${n()} hovlisidan xazina topdi: uchta tanga va eski paypoq`,
-      () => `Shalash egasi ${O} yana olovda nimadir pishirmoqda. Hid butun shaharga yetdi`,
-      () => `${st()}-ko‘chadagi devorni kimdir bo‘yab ketdi. Izlar mushukka olib boradi`,
-      () => `${n()} va ${n()} kimning hovlisi chiroyli ekanini bahslashmoqda. Bahs davom etmoqda`,
-      () => `${n()} o‘roq mashinasini sotib olib, shaharning yarmini qirqib chiqdi`,
-      () => `${n()} hamster oldi. Hamster egasidan allaqachon boyroq`,
-      () => `${n()} kalitlarini yo‘qotdi. ${n()}ning muzlatkichidan topildi`,
-      () => `Aholi ${O}dan shalashga ikkinchi qavat qurishni so‘ramoqda. Xo‘jayin o‘ylamoqda`,
-      () => `${n()} tomga antenna o‘rnatib, 1997-yildagi radioni tutdi`,
-      () => `${n()}ning mushugi qochib ketdi, endi uchta qo‘shnida birdan yashayapti`,
-      () => `${n()} kechasi uyini bo‘yamoqchi bo‘ldi. Dumaloq nuqtali chiqdi`,
-      () => `Shaharda allaqachon ${NICKS.length.toLocaleString('ru-RU')} aholi bor. Torroq, lekin quvnoq`,
-      () => `Shahar hokimi (u ham ${O}) kaptarlarni tanga bilan boqmaslikni so‘ramoqda`,
-      () => `Shalash yonida ${O} olovi yonmoqda, demak, hamma taklif qilingan`,
-      () => `${n()} kecha bir soat to‘tiqush bilan bahslashdi. To‘tiqush yutdi`,
-      () => `${n()} va ${n()} tushgacha uxlash klubini ochishdi. Birinchi yig‘ilish ertaga ko‘chirildi`,
-      () => `${n()} tomdan hech qachon u yerda bo‘lmagan to‘pni topdi. Qo‘shnilar hayron`,
-      () => `${st()}-ko‘cha ustidan non yog‘di. Ob-havo xizmati yelka qisdi`,
-      () => `${n()} mushugiga “salom” demoqni o‘rgatmoqda. Mushuk hozircha “miyov” deydi, lekin harakat qilyapti`,
-      () => `Shaharda hamma narsa 1 000 so‘m turadigan do‘kon ochildi. Navbat shalashgacha`,
-      () => `${n()} ikkinchi qavat qurmoqchi bo‘ldi. Birinchisini unutibdi`,
-      () => `Shalash egasi ${O} e’lon qildi: tomda ismini topgan odamga non beriladi`,
-      () => `${n()} non olgani chiqdi, gitara bilan qaytdi. Qo‘shnilar nonni qaytarishni so‘rashmoqda`,
-      () => `${st()}-ko‘cha aholisi hashar qildi. Faqat ${n()} ishladi, qolganlar uni qo‘llab-quvvatladi`,
-      () => `${n()} prokuratura tepasida uchayotgan choynakni ko‘rganini aytmoqda. Tekshiruv ketmoqda`,
-      () => `Prokuratura oxirgi somsaning yo‘qolishini tergov qilmoqda. Asosiy gumonlanuvchi — ${n()}`,
-      () => `${n()} “Hovlidagi eng baland kulgi” tanlovida g‘olib bo‘ldi. Qo‘shnilar hayron va uyqusiz`,
-      () => `Yangi rekord: ${n()} uyidan shalashgacha 3 soatda yetib bordi. Hamma bilan to‘xtab gaplashdi`,
-      () => `${n()} shippagini yo‘qotdi. Shippak ${n()} nikidan yangi oila topdi`,
-      () => `${st()}-ko‘chadagi kampirlar tasdiqladi: ${n()} yana chiroqni o‘chirishni unutibdi`,
-      () => `Aholi bo‘sh uchastkalarni ko‘paytirishni so‘ramoqda. Xo‘jayin ${O} o‘ylab ko‘rishga va’da berdi`,
-      () => `${n()} osh evaziga shaharni bir soatda aylanib chiqishga bahslashdi. Osh yutqazdi`,
-      () => `${n()}ning hovlisida budkadek tarvuz o‘sdi. Itni allaqachon ko‘chirib qo‘yishdi`,
-      () => `Shahar radiosi direktori ${n()} yangiliklar o‘rniga tasodifan audiokitob qo‘yib yubordi`,
-    ],
-  };
-})();
-const ticker = {x: 0, w: 0, last: 0, el: $('#ntext'), box: $('#ntext').parentElement};
+const NEWS = getNewsList(500); // Генерирует массив из 500 шуток
+
+const ticker = { x: 0, w: 0, last: 0, el: $('#ntext'), box: $('#ntext').parentElement };
 function fillNews() {
   const pool = NEWS[LANG], pickF = () => pool[Math.floor(Math.random() * pool.length)];
-  ticker.el.innerHTML = Array.from({length: 8}, () => `<span>${pickF()()}</span>`).join('');
+  ticker.el.innerHTML = Array.from({length: 10}, () => `<span>${pickF()()}</span>`).join('');
   ticker.w = ticker.el.scrollWidth; ticker.x = ticker.box.clientWidth;
 }
 function stepNews(now) {
